@@ -312,7 +312,8 @@ module NewRelic
         http.read_timeout = nil
         begin
           NewRelic::TimerLib.timeout(@request_timeout) do
-            ::NewRelic::Agent.logger.debug "Sending request to #{opts[:collector]}#{opts[:uri]}"
+            #::NewRelic::Agent.logger.debug "Sending request to #{opts[:collector]}#{opts[:uri]}"
+            ::NewRelic::Agent.logger.debug "Sending request to #{opts[:collector]}#{opts[:uri]} with body #{request.body}"
             response = http.request(request)
           end
         rescue Timeout::Error
@@ -332,6 +333,7 @@ module NewRelic
         when Net::HTTPRequestEntityTooLarge
           raise UnrecoverableServerException, '413 Request Entity Too Large'
         when Net::HTTPUnsupportedMediaType
+          ::NewRelic::Agent.logger.warn "Net::HTTPUnsupportedMediaType (#{response.code}): #{response.message}"
           raise UnrecoverableServerException, '415 Unsupported Media Type'
         else
           raise ServerConnectionException, "Unexpected response from server (#{response.code}): #{response.message}"
