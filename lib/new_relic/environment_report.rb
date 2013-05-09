@@ -62,21 +62,23 @@ module NewRelic
     report_on('Ruby description'){ RUBY_DESCRIPTION }
     report_on('Ruby platform'){ RUBY_PLATFORM }
     report_on('Ruby patchlevel'){ RUBY_PATCHLEVEL.to_s }
-    report_on('JRuby version') { JRUBY_VERSION }
-    report_on('Java VM version') { ENV_JAVA['java.vm.version']}
+    if defined? ::JRUBY_VERSION
+      report_on('JRuby version') { JRUBY_VERSION }
+      report_on('Java VM version') { ENV_JAVA['java.vm.version']}
+    end
     report_on('Processors') { ::NewRelic::Agent::SystemInfo.processor_count }
     report_on('Arch') { ::NewRelic::Agent::SystemInfo.processor_arch }
     report_on('OS version') { ::NewRelic::Agent::SystemInfo.os_version }
     report_on('OS') { ::NewRelic::Agent::SystemInfo.ruby_os_identifier }
     report_on 'Database adapter' do
-      ActiveRecord::Base.configurations[NewRelic::Control.instance.env]['adapter']
+      ActiveRecord::Base.connection.instance_variable_get(:@config)[:adapter]
     end
     report_on('Framework') { Agent.config[:framework].to_s }
     report_on('Dispatcher') { Agent.config[:dispatcher].to_s }
     report_on('Environment') { NewRelic::Control.instance.env }
     report_on('Rails version') { ::Rails::VERSION::STRING }
     report_on 'Rails threadsafe' do
-      ::Rails.configuration.action_controller.allow_concurrency
+      ::Rails.configuration.allow_concurrency
     end
     report_on 'Rails Env' do
       if defined? ::Rails and ::Rails.respond_to?(:env)
